@@ -1,2 +1,2 @@
 # HeartsExample
-Basic implementation of the hearts card game using C#
+ Implementation of the hearts card game for C#
