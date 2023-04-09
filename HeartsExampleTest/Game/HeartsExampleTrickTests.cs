@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using CardDeck.Models;
 using HeartsExample.Game;
 using HeartsExample.Game.Player;
+using HeartsExampleTest.Game.Helpers;
 using NUnit.Framework;
 
 namespace HeartsExampleTest.Game
@@ -23,33 +25,71 @@ namespace HeartsExampleTest.Game
             Players.Add(new ComputerPlayer($"Test{4}"));
         }
 
-        //basic tests
-        [TestCase(1, false, "2C", "3C", "4C", "5C", "2C", "Test4")]
-        [TestCase(1, false, "KC", "2C", "AC", "QC", "2C", "Test3")]
-        [TestCase(1, false, "1C", "AC", "9C", "2C", "2C", "Test2")]
-        [TestCase(1, false, "AC", "KC", "QC", "2C", "2C", "Test1")]
-
-        //regular tests
-        [TestCase(6, false, "AS", "KS", "4S", "AH", "AS", "Test1")]
-        public void TestDetermineTrickWinner(int trickNumber, bool heartsBroken, string player1Card, string player2Card, string player3Card, string player4Card, string startingCard, string winningPlayerName)
+        [Test]
+        public void TestDetermineTrickWinnerRandomHands()
         {
             //Arrange
             List<Tuple<BasePlayer, Card>> cardsInTrick = new List<Tuple<BasePlayer, Card>>();
-            Trick trick = new Trick(trickNumber, heartsBroken);
 
-            Card startingCardObject = Card.ParsePlayerInput(startingCard);
+            Random random = new Random();
 
-            cardsInTrick.Add(new Tuple<BasePlayer, Card>(Players[0], Card.ParsePlayerInput(player1Card)));
-            cardsInTrick.Add(new Tuple<BasePlayer, Card>(Players[1], Card.ParsePlayerInput(player2Card)));
-            cardsInTrick.Add(new Tuple<BasePlayer, Card>(Players[2], Card.ParsePlayerInput(player3Card)));
-            cardsInTrick.Add(new Tuple<BasePlayer, Card>(Players[3], Card.ParsePlayerInput(player4Card)));
+            //run this test 10000 times
+            for (int i = 0; i < 10000; i++)
+            {
+                //start a random trick
+                Trick trick = new Trick(random.Next(1, 14), random.Next(0, 1) == 1);
 
-            //Act 
-            Tuple<BasePlayer, Card> computedResult = trick.DetermineTrickWinner(cardsInTrick, startingCardObject);
-            BasePlayer actualResult = Players.First(x => x.Name.Equals(winningPlayerName));
+                //shuffle deck for more randomness
+                Deck deck = new();
+                Assert.That(deck.Cards.Count, Is.EqualTo(52), "Deck does not have 52 cards");
+                deck.ShuffleDeck();
 
-            //Assert
-            Assert.That(computedResult.Item1.Name.Equals(actualResult.Name), "Wrong player won! ");
+                //deal cards
+                Players.ForEach(x => x.ResetCards());
+
+                for (int j = 0; j <= deck.Cards.Count - 1; j++)
+                {
+                    Players[j % 4].DealCard(deck.Cards[j]);
+                }
+
+                Card startingCard = new Card();
+
+                //this runs through a 4 player trick using random cards and random game parameters for as many times as the
+                //above loop is initialized, that should be a fairly large number(at least 10k) to simulate randomness,
+                //the below comparison and assert must be absolutely fool proof
+                //because we have to make sure the trick logic of validating a played card and the logic to determine a winner is correct 
+                //100 percent of the time
+                for (int playerCount = 1; playerCount <= 4; playerCount++)
+                {
+                    BasePlayer player = Players[playerCount - 1];
+
+                    Card playerCard = player.GetRandomCard();
+
+                    if (playerCount == 1)
+                    {
+                        startingCard = playerCard;
+                    }
+
+                    bool expectedResult = TrickWinnerHelper.CardIsValidForTrick(trick, cardsInTrick, playerCard, player.PlayerCards, startingCard);
+                    bool actualResult = trick.CardIsValidForTrick(cardsInTrick, playerCard, player.PlayerCards, startingCard);
+
+                    if (actualResult == false)
+                    {
+                        Console.WriteLine("Test");
+                    }
+
+                    Assert.That(expectedResult == actualResult, "Card is not valid for trick. ");
+
+                    cardsInTrick.Add(new Tuple<BasePlayer, Card>(player, playerCard));
+                }
+
+                Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper.DetermineTrickWinner(cardsInTrick, startingCard);
+                Tuple<BasePlayer, Card> actualTrickWinner = trick.DetermineTrickWinner(cardsInTrick, startingCard);
+
+                Assert.That(expectedTrickWinner.Item1.Name.Equals(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
+
+                cardsInTrick.Clear();
+            }
         }
     }
 }

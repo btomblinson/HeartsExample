@@ -103,7 +103,7 @@ namespace HeartsExample.Game
 
             if (trickWinner == null)
             {
-                throw new Exception("Unable to determine trick winner");
+                throw new ArgumentException("Unable to determine trick winner");
             }
 
             Console.WriteLine($"Player {trickWinner.Item1.Name} won trick with {trickWinner.Item2}");

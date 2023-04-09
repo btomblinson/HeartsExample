@@ -9,6 +9,7 @@ using CardDeck.Models;
 using HeartsExample.Game;
 using HeartsExample.Game.Enums;
 using HeartsExample.Game.Player;
+using HeartsExampleTest.Game.Helpers;
 using NUnit.Framework;
 
 namespace HeartsExampleTest.Game
@@ -162,8 +163,8 @@ namespace HeartsExampleTest.Game
                 Assert.That(player.PlayerCards.Count == 12, "Player does not have 12 cards. ");
             }
 
-            Tuple<BasePlayer, Card> actualTrickWinner = TrickWinnerHelper(game.CurrentHand.CurrentTrick, cardsInTrick, startingCard);
-            Tuple<BasePlayer, Card> expectedTrickWinner = game.CurrentHand.CurrentTrick.DetermineTrickWinner(cardsInTrick, startingCard);
+            Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper.DetermineTrickWinner(cardsInTrick, startingCard);
+            Tuple<BasePlayer, Card> actualTrickWinner = game.CurrentHand.CurrentTrick.DetermineTrickWinner(cardsInTrick, startingCard);
             Assert.That(expectedTrickWinner.Item1.Name.Equals(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
         }
 
@@ -212,7 +213,7 @@ namespace HeartsExampleTest.Game
                 }
 
                 //determine who won trick and reset order
-                Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper(game.CurrentHand.CurrentTrick, cardsInTrick, startingCard);
+                Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper.DetermineTrickWinner(cardsInTrick, startingCard);
                 Tuple<BasePlayer, Card> actualTrickWinner = game.CurrentHand.CurrentTrick.DetermineTrickWinner(cardsInTrick, startingCard);
                 Assert.That(expectedTrickWinner.Item1.Name.Equals(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
 
@@ -234,38 +235,6 @@ namespace HeartsExampleTest.Game
             Assert.That(game.Players.Sum(x => x.TrickPoints) == 26, "Player trick points do not sum to 26. ");
         }
 
-        private Tuple<BasePlayer, Card> TrickWinnerHelper(Trick handCurrentTrick, List<Tuple<BasePlayer, Card>> cardsInTrick, Card startingCard)
-        {
-            Tuple<BasePlayer, Card> trickWinner = null;
-
-            if (!handCurrentTrick.HeartsBroken && cardsInTrick.Count(x => x.Item2.CardSuit.Equals(Suit.Hearts)) > 0)
-            {
-                handCurrentTrick.HeartsBroken = true;
-            }
-
-            //if the starting card is the only one of this suit, they were the winner
-            if (cardsInTrick.Count(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)) == 1)
-            {
-                trickWinner = cardsInTrick.First(x => x.Item2.CardSuit.Equals(startingCard.CardSuit));
-            }
-            //if all cards are same suit, find largest one, that player won the trick
-            else if (cardsInTrick.Count(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)) == 4)
-            {
-                trickWinner = cardsInTrick.OrderByDescending(x => x.Item2.CardFaceValue).First();
-            }
-            else
-            {
-                trickWinner = cardsInTrick.Where(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)).OrderByDescending(x => x.Item2.CardFaceValue).First();
-            }
-
-            if (trickWinner == null)
-            {
-                throw new Exception("Unable to determine trick winner");
-            }
-
-            Console.WriteLine($"Player {trickWinner.Item1.Name} won trick with {trickWinner.Item2}");
-
-            return trickWinner;
-        }
+     
     }
 }

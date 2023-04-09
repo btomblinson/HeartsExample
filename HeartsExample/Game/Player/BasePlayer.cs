@@ -54,6 +54,15 @@ namespace HeartsExample.Game.Player
             PlayerCards.Sort();
         }
 
+        public Card GetRandomCard()
+        {
+            Random random = new Random();
+            int index = random.Next(PlayerCards.Count);
+            Card card = PlayerCards[index];
+            PlayerCards.RemoveAt(index);
+            return card;
+        }
+
         public virtual void PlayCard(Card card)
         {
             if (!PlayerCards.Any(x => x.CardSuit == card.CardSuit && x.CardFaceValue == card.CardFaceValue))
@@ -75,7 +84,6 @@ namespace HeartsExample.Game.Player
         {
             return PlayerCards.Count(x => x.CardFaceValue == Card.StartingTrickCard.CardFaceValue && x.CardSuit == Card.StartingTrickCard.CardSuit) > 0;
         }
-
 
         #endregion
 
