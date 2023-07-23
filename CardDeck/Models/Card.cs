@@ -11,7 +11,7 @@ namespace CardDeck.Models
     /// <summary>
     /// Represents a playing card that has both a suit and a face value
     /// </summary>
-    public class Card : IEquatable<Card>, IComparable<Card>
+    public class Card : IEquatable<Card>, IComparable<Card>, ICloneable
     {
         public Suit CardSuit { get; set; }
 
@@ -97,6 +97,11 @@ namespace CardDeck.Models
                 CardFaceValue = face.GetValueFromDescription<FaceValue>(),
                 CardSuit = suit.GetValueFromDescription<Suit>()
             };
+        }
+
+        public object Clone()
+        {
+            return base.MemberwiseClone();
         }
     }
 }

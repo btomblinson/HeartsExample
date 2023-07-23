@@ -15,7 +15,7 @@ namespace HeartsExampleTest.Game
             try
             {
                 HeartsExample.Game.Game game = new(numPlayers);
-                Assert.That(game.Players.Count(x => x.IsHuman) == numPlayers, "Invalid Human player count. ");
+                Assert.That(game.Players.Count(x => x.IsHuman), Is.EqualTo(numPlayers), "Invalid Human player count. ");
             }
             catch (ArgumentException e)
             {

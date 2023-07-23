@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CardDeck.Models;
 using HeartsExample.Game;
+using HeartsExample.Game.Enums;
 using HeartsExample.Game.Player;
 using HeartsExampleTest.Game.Helpers;
 using NUnit.Framework;
@@ -33,7 +34,7 @@ namespace HeartsExampleTest.Game
 
             Random random = new Random();
 
-            //run this test 10000 times
+            //run this test a ton
             for (int i = 0; i < 10000; i++)
             {
                 //start a random trick
@@ -41,7 +42,7 @@ namespace HeartsExampleTest.Game
 
                 //shuffle deck for more randomness
                 Deck deck = new();
-                Assert.That(deck.Cards.Count, Is.EqualTo(52), "Deck does not have 52 cards");
+                Assert.That(deck.Cards, Has.Count.EqualTo(52), "Deck does not have 52 cards");
                 deck.ShuffleDeck();
 
                 //deal cards
@@ -78,7 +79,7 @@ namespace HeartsExampleTest.Game
                         Console.WriteLine("Test");
                     }
 
-                    Assert.That(expectedResult == actualResult, "Card is not valid for trick. ");
+                    Assert.That(expectedResult, Is.EqualTo(actualResult), "Card is not valid for trick. ");
 
                     cardsInTrick.Add(new Tuple<BasePlayer, Card>(player, playerCard));
                 }
@@ -86,10 +87,54 @@ namespace HeartsExampleTest.Game
                 Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper.DetermineTrickWinner(cardsInTrick, startingCard);
                 Tuple<BasePlayer, Card> actualTrickWinner = trick.DetermineTrickWinner(cardsInTrick, startingCard);
 
-                Assert.That(expectedTrickWinner.Item1.Name.Equals(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
+                Assert.That(expectedTrickWinner.Item1.Name, Is.EqualTo(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
 
                 cardsInTrick.Clear();
             }
+        }
+
+        [Test]
+        public void TestPlayFirstTrick()
+        {
+            //By now we've tested initialize and dealing hand so we can just focus on testing first trick 
+            //Arrange
+            List<Tuple<BasePlayer, Card>> cardsInTrick = new List<Tuple<BasePlayer, Card>>();
+
+            HeartsExample.Game.Game game = new(0);
+            game.StartNewGame();
+
+            //Act
+            Card startingCard = Card.StartingTrickCard;
+            for (int playerCount = 1; playerCount <= 4; playerCount++)
+            {
+                BasePlayer player = game.Players.First(x => x.OrderInTrick == (TrickOrder)playerCount);
+
+                Card playerCard = player.DetermineCardToPlay(game.CurrentHand.CurrentTrick, cardsInTrick, startingCard);
+
+                Assert.That(game.CurrentHand.CurrentTrick.CardIsValidForTrick(cardsInTrick, playerCard, player.PlayerCards, startingCard), "Invalid card for trick!");
+
+                if (playerCount == 1)
+                {
+                    startingCard = playerCard;
+                }
+
+                player.PlayCard(playerCard);
+                cardsInTrick.Add(new Tuple<BasePlayer, Card>(player, playerCard));
+            }
+
+            //Assert
+            //must be 4 cards in trick
+            Assert.That(cardsInTrick, Has.Count.EqualTo(4), "Not enough cards played in trick! ");
+
+            //every player must have 12 cards
+            foreach (BasePlayer player in game.Players)
+            {
+                Assert.That(player.PlayerCards, Has.Count.EqualTo(12), "Player does not have 12 cards. ");
+            }
+
+            Tuple<BasePlayer, Card> expectedTrickWinner = TrickWinnerHelper.DetermineTrickWinner(cardsInTrick, startingCard);
+            Tuple<BasePlayer, Card> actualTrickWinner = game.CurrentHand.CurrentTrick.DetermineTrickWinner(cardsInTrick, startingCard);
+            Assert.That(expectedTrickWinner.Item1.Name, Is.EqualTo(actualTrickWinner.Item1.Name), "Expected player did not win trick. ");
         }
     }
 }

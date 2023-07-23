@@ -2,10 +2,11 @@
 using CardDeck.Extensions;
 using CardDeck.Models;
 using HeartsExample.Game.Enums;
+using System.Linq;
 
 namespace HeartsExample.Game.Player
 {
-    public abstract class BasePlayer
+    public abstract class BasePlayer : ICloneable
     {
         #region Properties
 
@@ -92,6 +93,17 @@ namespace HeartsExample.Game.Player
         public abstract Card DetermineCardToPlay(Trick currentTrick, List<Tuple<BasePlayer, Card>> cardsInTrick, Card? startingCard = null);
 
         public abstract List<Card> PassCards();
+
+        #endregion
+
+        #region Interface
+
+        public object Clone()
+        {
+            BasePlayer clone = (BasePlayer)base.MemberwiseClone();
+            clone.PlayerCards = PlayerCards.Select(x => (Card)x.Clone()).ToList();
+            return clone;
+        }
 
         #endregion
     }

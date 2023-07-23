@@ -25,8 +25,7 @@ namespace HeartsExample.Game
         /// <summary>
         /// Initialize a new hearts hand, after initializing this class, the below 3 methods must be called in order to fully setup a hand
         /// </summary><br/>
-        /// <param name="numPlayers">The number of human players, these players will be prompted for moves,
-        /// otherwise computer players use simple AI to determine their moves</param><br/>
+        /// <br/>
         /// <see cref="DealStartOfHand"/><br/>
         /// <see cref="HandlePreHandCardPassing"/><br/>
         /// <see cref="DetermineStartingPlayer"/><br/>
@@ -45,9 +44,11 @@ namespace HeartsExample.Game
             CurrentTrick.TrickNumber = 1;
 
             DealStartOfHand();
+            HandlePreHandCardPassing();
+            DetermineStartingPlayer();
         }
 
-        private void ManageHand()
+        public void ManageHand()
         {
             List<Tuple<BasePlayer, Card>> cardsInTrick = new List<Tuple<BasePlayer, Card>>();
 
@@ -108,24 +109,10 @@ namespace HeartsExample.Game
                 {
                     Console.WriteLine($"{x.Name}: {x.TrickPoints}");
                 });
+
                 Console.WriteLine();
 
-                //hand has ended, apply player trick points to game points
-                //first check for a moonshot
-                if (CurrentGame.Players.Any(x => x.TrickPoints == 26))
-                {
-                    CurrentGame.Players.Where(x => x.TrickPoints == 0).ToList().ForEach(y =>
-                    {
-                        y.GamePoints += 26;
-                    });
-                }
-                else
-                {
-                    CurrentGame.Players.ForEach(x =>
-                    {
-                        x.GamePoints += x.TrickPoints;
-                    });
-                }
+                ApplyTrickPointsToGamePoints();
 
                 //reset hearts broken
                 CurrentTrick.HeartsBroken = false;
@@ -137,9 +124,34 @@ namespace HeartsExample.Game
                 {
                     Console.WriteLine($"{x.Name}: {x.GamePoints}");
                 });
+
                 Console.WriteLine();
             }
         }
+
+        #region ApplyTrickPointsToGamePoints
+
+        public void ApplyTrickPointsToGamePoints()
+        {
+            //hand has ended, apply player trick points to game points
+            //first check for a moonshot
+            if (CurrentGame.Players.Any(x => x.TrickPoints == 26))
+            {
+                CurrentGame.Players.Where(x => x.TrickPoints == 0).ToList().ForEach(y =>
+                {
+                    y.GamePoints += 26;
+                });
+            }
+            else
+            {
+                CurrentGame.Players.ForEach(x =>
+                {
+                    x.GamePoints += x.TrickPoints;
+                });
+            }
+        }
+
+        #endregion
 
         #region DealStartOfHand
 
@@ -148,11 +160,6 @@ namespace HeartsExample.Game
         /// </summary>
         public void DealStartOfHand()
         {
-            if (FirstHand != true)
-            {
-                throw new Exception("Not first hand. ");
-            }
-
             Deck deck = new();
             deck.ShuffleDeck();
 
@@ -170,11 +177,6 @@ namespace HeartsExample.Game
 
         public BasePlayer DetermineStartingPlayer()
         {
-            if (FirstHand != true)
-            {
-                throw new Exception("Not first hand. ");
-            }
-
             //find the player with the 2 of clubs, they start the Trick
             BasePlayer? startingPlayer = CurrentGame.Players.Find(x => x.PlayerHasStartingCardForTrick()) ?? null;
 
@@ -196,11 +198,6 @@ namespace HeartsExample.Game
 
         public void HandlePreHandCardPassing()
         {
-            if (FirstHand != true)
-            {
-                throw new Exception("Not first hand. ");
-            }
-
             //handle card passing based on hand number
             if (CardPassingMethod.Equals(PassingMethod.Left) || CardPassingMethod.Equals(PassingMethod.Right) || CardPassingMethod.Equals(PassingMethod.Across))
             {

@@ -14,26 +14,39 @@ namespace HeartsExampleTest.Game.Helpers
     {
         public static Tuple<BasePlayer, Card> DetermineTrickWinner(List<Tuple<BasePlayer, Card>> cardsInTrick, Card startingCard)
         {
-            Tuple<BasePlayer, Card> trickWinner = null;
+            Tuple<BasePlayer, Card> temp;
+            Tuple<BasePlayer, Card> trickWinner;
 
             //if the starting card is the only one of this suit, they were the winner
             if (cardsInTrick.Count(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)) == 1)
             {
-                trickWinner = cardsInTrick.First(x => x.Item2.CardSuit.Equals(startingCard.CardSuit));
+                temp = cardsInTrick.First(x => x.Item2.CardSuit.Equals(startingCard.CardSuit));
             }
             //if all cards are same suit, find largest one, that player won the trick
             else if (cardsInTrick.Count(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)) == 4)
             {
-                trickWinner = cardsInTrick.OrderByDescending(x => x.Item2.CardFaceValue).First();
+                temp = cardsInTrick.OrderByDescending(x => x.Item2.CardFaceValue).First();
             }
             else
             {
-                trickWinner = cardsInTrick.Where(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)).OrderByDescending(x => x.Item2.CardFaceValue).First();
+                temp = cardsInTrick.Where(x => x.Item2.CardSuit.Equals(startingCard.CardSuit)).OrderByDescending(x => x.Item2.CardFaceValue).First();
             }
+
+            trickWinner = new Tuple<BasePlayer, Card>((BasePlayer)temp.Item1.Clone(), (Card)temp.Item2.Clone());
 
             if (trickWinner == null)
             {
                 throw new Exception("Unable to determine trick winner");
+            }
+
+            if (cardsInTrick.Any(x => x.Item2.CardSuit.Equals(Suit.Hearts)))
+            {
+                trickWinner.Item1.TrickPoints += cardsInTrick.Count(x => x.Item2.CardSuit.Equals(Suit.Hearts));
+            }
+
+            if (cardsInTrick.Any(x => x.Item2.CardSuit.Equals(Card.QueenOfSpades.CardSuit) && x.Item2.CardFaceValue.Equals(Card.QueenOfSpades.CardFaceValue)))
+            {
+                trickWinner.Item1.TrickPoints += 13;
             }
 
             return trickWinner;

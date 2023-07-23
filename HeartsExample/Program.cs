@@ -15,3 +15,5 @@ if (players is < 0 or > 4)
 
 Game game = new Game(players);
 game.StartNewGame();
+
+game.CurrentHand.ManageHand();
