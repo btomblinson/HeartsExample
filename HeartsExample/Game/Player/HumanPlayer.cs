@@ -16,7 +16,7 @@ namespace HeartsExample.Game.Player
             IsHuman = true;
         }
 
-        public override Card DetermineCardToPlay(Trick currentTrick, List<Tuple<BasePlayer, Card>> cardsInTrick, Card? startingCard = null)
+        public override Card DetermineCardToPlay(Trick currentTrick, Card? startingCard = null)
         {
             Card card = null;
             bool validCard = false;
@@ -43,7 +43,7 @@ namespace HeartsExample.Game.Player
                         //if 2 list all valid
                         case "2":
                         {
-                            foreach (Card cards in PlayerCards.Where(x => currentTrick.CardIsValidForTrick(cardsInTrick, x, PlayerCards, startingCard)).ToList())
+                            foreach (Card cards in PlayerCards.Where(x => currentTrick.CardIsValidForTrick(x, PlayerCards, startingCard)).ToList())
                             {
                                 Console.WriteLine(cards.ToString());
                             }
@@ -67,7 +67,7 @@ namespace HeartsExample.Game.Player
                     }
                 }
 
-                if (card != null && currentTrick.CardIsValidForTrick(cardsInTrick, card, PlayerCards, startingCard))
+                if (card != null && currentTrick.CardIsValidForTrick(card, PlayerCards, startingCard))
                 {
                     validCard = true;
                 }

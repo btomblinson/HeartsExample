@@ -15,12 +15,12 @@ namespace HeartsExample.Game.Player
             IsHuman = false;
         }
 
-        public override Card DetermineCardToPlay(Trick currentTrick, List<Tuple<BasePlayer, Card>> cardsInTrick, Card? startingCard = null)
+        public override Card DetermineCardToPlay(Trick currentTrick, Card? startingCard = null)
         {
             //if its first trick has to be a club and not hearts or queen of spades
             if (currentTrick.TrickNumber == 1)
             {
-                if (cardsInTrick.Count == 0)
+                if (currentTrick.CardsInTrick.Count == 0)
                 {
                     //we have to have the 2 of clubs
                     return PlayerCards.First(x => x.Equals(Card.StartingTrickCard));
@@ -71,7 +71,7 @@ namespace HeartsExample.Game.Player
             if (PlayerCards.Any(x => x.CardSuit == startingCard.CardSuit))
             {
                 //check if there are hearts or queen of spades played
-                if (cardsInTrick.Any(x => x.Item2.CardSuit.Equals(Suit.Hearts)) || cardsInTrick.Any(x => x.Item2.CardSuit.Equals(Card.QueenOfSpades.CardSuit) && x.Item2.CardFaceValue.Equals(Card.QueenOfSpades.CardFaceValue)))
+                if (currentTrick.CardsInTrick.Any(x => x.Item2.CardSuit.Equals(Suit.Hearts)) || currentTrick.CardsInTrick.Any(x => x.Item2.CardSuit.Equals(Card.QueenOfSpades.CardSuit) && x.Item2.CardFaceValue.Equals(Card.QueenOfSpades.CardFaceValue)))
                 {
                     //if the player has a card that does not beat what is out there play it
                     if (PlayerCards.Any(x => x.CardSuit == startingCard.CardSuit && x.CardFaceValue < startingCard.CardFaceValue))
@@ -83,7 +83,7 @@ namespace HeartsExample.Game.Player
 
                     //check and see if they are the last player to play, if they are just play their highest card
 
-                    if (cardsInTrick.Count() == 3)
+                    if (currentTrick.CardsInTrick.Count() == 3)
                     {
                         return PlayerCards.Where(x => x.CardSuit == startingCard.CardSuit).OrderByDescending(y => y.CardFaceValue).First();
                     }

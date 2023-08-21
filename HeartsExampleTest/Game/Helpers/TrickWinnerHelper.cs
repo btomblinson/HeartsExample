@@ -62,16 +62,16 @@ namespace HeartsExampleTest.Game.Helpers
         /// <param name="otherCardsForPlayer"></param>
         /// <param name="startingCard"></param>
         /// <returns></returns>
-        public static bool CardIsValidForTrick(Trick currentTrick, List<Tuple<BasePlayer, Card>> cardsInTrick, Card playerCard, List<Card> otherCardsForPlayer, Card startingCard)
+        public static bool CardIsValidForTrick(Trick currentTrick, Card playerCard, List<Card> otherCardsForPlayer, Card startingCard)
         {
             //if its first trick and no cards have been played, player must have played 2 of clubs
-            if (currentTrick.TrickNumber == 1 && cardsInTrick.Count == 0)
+            if (currentTrick is { TrickNumber: 1, CardsInTrick.Count: 0 })
             {
                 return playerCard.Equals(Card.StartingTrickCard);
             }
 
             //check that we lead the trick off correctly
-            if (cardsInTrick.Count == 0)
+            if (currentTrick.CardsInTrick.Count == 0)
             {
                 //if player starts trick with a heart, and hearts have not been broken, and player has other cards in hand not hearts that's invalid
                 if (playerCard.CardSuit == Suit.Hearts && !currentTrick.HeartsBroken && otherCardsForPlayer.Count(x => x.CardSuit != Suit.Hearts) > 0)
