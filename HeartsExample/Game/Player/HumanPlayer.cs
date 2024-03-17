@@ -56,10 +56,17 @@ namespace HeartsExample.Game.Player
                             if (response.Length == 2)
                             {
                                 card = Card.ParsePlayerInput(response);
+
+                                if (!PlayerCards.Any(x => x.CardSuit == card.CardSuit && x.CardFaceValue == card.CardFaceValue))
+                                {
+                                    Console.WriteLine("Player does not have card");
+                                    response = string.Empty;
+                                }
                             }
                             else
                             {
-                                throw new Exception("Couldn't read player input. ");
+                                Console.WriteLine("Couldn't read player input. ");
+                                response = string.Empty;
                             }
 
                             break;
@@ -75,7 +82,7 @@ namespace HeartsExample.Game.Player
 
             if (card == null)
             {
-                throw new Exception("Couldn't read player input. ");
+                Console.WriteLine("Couldn't read player input. ");
             }
 
             return card;
@@ -122,12 +129,21 @@ namespace HeartsExample.Game.Player
                             if (response.Length == 2)
                             {
                                 Card card = Card.ParsePlayerInput(response);
-                                RemoveCard(card);
-                                cards.Add(card);
+
+                                if (PlayerCards.Any(x => x.CardSuit == card.CardSuit && x.CardFaceValue == card.CardFaceValue))
+                                {
+                                    RemoveCard(card);
+                                    cards.Add(card);
+                                    break;
+                                }
+
+                                response = string.Empty;
+                                Console.WriteLine($"Player does not have card {card} ");
                             }
                             else
                             {
-                                throw new Exception("Couldn't read player input. ");
+                                response = string.Empty;
+                                Console.WriteLine("Couldn't read player input. ");
                             }
 
                             break;
@@ -138,7 +154,5 @@ namespace HeartsExample.Game.Player
 
             return cards;
         }
-
-       
     }
 }

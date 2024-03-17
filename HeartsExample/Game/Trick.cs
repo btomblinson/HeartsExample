@@ -45,7 +45,13 @@ namespace HeartsExample.Game
 			TrickNumber++;
 		}
 
-		public void SortPlayerTrickOrder(BasePlayer startingPlayer)
+        public void SetupFreshTrick()
+        {
+            CardsInTrick.Clear();
+            TrickNumber =1;
+        }
+
+        public void SortPlayerTrickOrder(BasePlayer startingPlayer)
 		{
 			int startingIndex = CurrentGame.Players.IndexOf(startingPlayer);
 

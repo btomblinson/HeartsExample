@@ -41,7 +41,7 @@ namespace HeartsExample.Game
 		public void StartNewHand()
 		{
 			HandCount++;
-			CurrentTrick.SetupNextTrick();
+			CurrentTrick.SetupFreshTrick();
 
 			DealStartOfHand();
 			HandlePreHandCardPassing();
